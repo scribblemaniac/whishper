@@ -21,15 +21,15 @@ RUN chmod a+rx whishper
 FROM node:alpine as frontend
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN apk add nodejs-current && corepack enable && corepack prepare pnpm@8.15.5 --activate
 COPY ./frontend /app
 WORKDIR /app
 
 FROM frontend AS frontend-prod-deps
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod
 
 FROM frontend AS frontend-build
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install
 ENV BODY_SIZE_LIMIT=0
 RUN pnpm run build
 
